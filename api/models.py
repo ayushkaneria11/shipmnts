@@ -1,5 +1,50 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 # Create your models here.
 
 
+# APIs to be developed
+
+# Authentication system to get Authtoken to make API calls
+# API to post, update and show a question
+# A question should have
+# Title
+# Body
+# Relevant tags to the question to make it more searchable
+# API to post answers to a particular question
+# API to show questions and related answers
+# API to accept the answer to a question
+# API to upvote or downvote a question and answer
+# API to get all questions related to a tag
+# API to get all questions posted by a particular user
+
+
+
+class Question(models.Model):
+    title = models.CharField(max_length=200)
+    body = models.TextField()
+    tags = models.CharField(max_length=200)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    upvotes = models.IntegerField(default=0)
+    downvotes = models.IntegerField(default=0)
+    answer_count = models.IntegerField(default=0)
+    # answer = models.ForeignKey('Answer', on_delete=models.CASCADE, null=True)
+
+class Answer(models.Model):
+    body = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    question = models.ForeignKey('Question', on_delete=models.CASCADE)
+    upvotes = models.IntegerField(default=0)
+    downvotes = models.IntegerField(default=0)
+
+# class User(models.Model):
+#     username = models.CharField(max_length=200)
+#     password = models.CharField(max_length=200)
+#     email = models.CharField(max_length=200)
+#     created_at = models.DateTimeField(auto_now_add=True)
+#     updated_at = models.DateTimeField(auto_now=True)
