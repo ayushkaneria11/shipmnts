@@ -1,6 +1,7 @@
 import graphene
 
-from StackOverflow import schema
+import api.schema as schema
+
 
 
 class Query(schema.Query, graphene.ObjectType):
