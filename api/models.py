@@ -24,7 +24,7 @@ from django.contrib.auth.models import User
 class Question(models.Model):
     title = models.CharField(max_length=200)
     body = models.TextField()
-    tags = models.CharField(max_length=200)
+    tags = models.ManyToManyField('Tag', blank=True, related_name='questions')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
@@ -41,6 +41,12 @@ class Answer(models.Model):
     question = models.ForeignKey('Question', on_delete=models.CASCADE)
     upvotes = models.IntegerField(default=0)
     downvotes = models.IntegerField(default=0)
+
+class Tag(models.Model):
+    name = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.name
 
 # class User(models.Model):
 #     username = models.CharField(max_length=200)
