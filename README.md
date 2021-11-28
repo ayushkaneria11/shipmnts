@@ -24,4 +24,4 @@ Some API endpoints need the authentication token which can be applied by registe
 - Access graphql: `/graphql/`
 
 ### Postman collection
-- Collection can be downloaded from [here]()
+- Collection can be downloaded from [here](https://documenter.getpostman.com/view/15265774/UVJcjwMv#56508d88-d65d-4dc7-ad7d-bc0acb1ba7f6)
