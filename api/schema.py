@@ -157,6 +157,30 @@ class CreateTag(graphene.Mutation):
 
         return CreateTag(tag=tag)
 
+# Accept Answer
+class AcceptAnswer(graphene.Mutation):
+    answer = graphene.Field(AnswerType)
+
+    class Arguments:
+        answerId = graphene.Int()
+        questionId = graphene.Int()
+
+    def mutate(self, info, answerId, questionId):
+        question = Question.objects.get(id=questionId)
+        answer = Answer.objects.get(id=answerId)
+
+        # question.accepted_answer = answer
+        if question.has_accepted_answer==False:
+            answer.is_accepted = True
+            question.has_accepted_answer= True
+            question.save()
+            answer.save()
+        else:
+            
+            raise Exception('Question already has accepted answer!')
+
+        return AcceptAnswer(answer=answer)
+
 # add tag to question
 # class AddTagToQuestion(graphene.Mutation):
 #     question = graphene.Field(QuestionType)
@@ -185,6 +209,7 @@ class Mutation(graphene.ObjectType):
     upvote_answer = UpvoteAnswer.Field()
     downvote_answer = DownvoteAnswer.Field()
     create_tag = CreateTag.Field()
+    accept_answer = AcceptAnswer.Field()
 
 
 class Query(graphene.ObjectType):
