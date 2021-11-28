@@ -31,8 +31,8 @@ class CreateQuestion(graphene.Mutation):
         tags = graphene.List(graphene.String)
 
     def mutate(self, info, questionTitle, questionBody, tags):
-
-        question = Question(body=questionBody, title=questionTitle)
+        user = info.context.user
+        question = Question(body=questionBody, title=questionTitle, user=user)
         question.save() 
         for tag in tags:
             # print(tag)
@@ -41,6 +41,30 @@ class CreateQuestion(graphene.Mutation):
             tag_obj.questions.add(question)
 
         return CreateQuestion(question=question)
+
+# Update Question Mutation
+class UpdateQuestion(graphene.Mutation):
+    question = graphene.Field(QuestionType)
+
+    class Arguments:
+        questionId = graphene.Int()
+        questionTitle = graphene.String()
+        questionBody = graphene.String()
+        tags = graphene.List(graphene.String)
+
+    def mutate(self, info, questionId, questionTitle, questionBody, tags):
+        user = info.context.user
+        question = Question.objects.get(pk=questionId)
+        question.title = questionTitle
+        question.body = questionBody
+        question.save()
+        for tag in tags:
+            # print(tag)
+            tag_obj, created = Tag.objects.get_or_create(name=tag.lower())
+            tag_obj.save() 
+            tag_obj.questions.add(question)
+
+        return UpdateQuestion(question=question)
 
 # Create Answer Mutation
 class CreateAnswer(graphene.Mutation):
@@ -52,7 +76,8 @@ class CreateAnswer(graphene.Mutation):
 
     def mutate(self, info, answerBody, questionId):
         question = Question.objects.get(id=questionId)
-        answer = Answer(body=answerBody, question=question)
+        user = info.context.user
+        answer = Answer(body=answerBody, question=question,user=user)
         answer.save()
 
         return CreateAnswer(answer=answer)
