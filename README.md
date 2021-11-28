@@ -9,6 +9,10 @@ Some API endpoints need the authentication token which can be applied by registe
 - Clone the repository
 `git clone https://github.com/ayushkaneria11/shipmnts.git`
 
+- Make Virtual Environment
+`mkvirtualenv env`
+`workon env`
+
 - Install all the required library and dependencies
 `pip install -r requirements.txt`
 
