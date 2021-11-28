@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 import graphene
 from graphene_django import DjangoObjectType
-
+import graphql_jwt
 from .models import Question, Answer,Tag
 
 
@@ -31,8 +31,8 @@ class CreateQuestion(graphene.Mutation):
         tags = graphene.List(graphene.String)
 
     def mutate(self, info, questionTitle, questionBody, tags):
-
-        question = Question(body=questionBody, title=questionTitle)
+        user = info.context.user
+        question = Question(body=questionBody, title=questionTitle, user=user)
         question.save() 
         for tag in tags:
             # print(tag)
@@ -41,6 +41,30 @@ class CreateQuestion(graphene.Mutation):
             tag_obj.questions.add(question)
 
         return CreateQuestion(question=question)
+
+# Update Question Mutation
+class UpdateQuestion(graphene.Mutation):
+    question = graphene.Field(QuestionType)
+
+    class Arguments:
+        questionId = graphene.Int()
+        questionTitle = graphene.String()
+        questionBody = graphene.String()
+        tags = graphene.List(graphene.String)
+
+    def mutate(self, info, questionId, questionTitle, questionBody, tags):
+        user = info.context.user
+        question = Question.objects.get(pk=questionId)
+        question.title = questionTitle
+        question.body = questionBody
+        question.save()
+        for tag in tags:
+            # print(tag)
+            tag_obj, created = Tag.objects.get_or_create(name=tag.lower())
+            tag_obj.save() 
+            tag_obj.questions.add(question)
+
+        return UpdateQuestion(question=question)
 
 # Create Answer Mutation
 class CreateAnswer(graphene.Mutation):
@@ -52,7 +76,8 @@ class CreateAnswer(graphene.Mutation):
 
     def mutate(self, info, answerBody, questionId):
         question = Question.objects.get(id=questionId)
-        answer = Answer(body=answerBody, question=question)
+        user = info.context.user
+        answer = Answer(body=answerBody, question=question,user=user)
         answer.save()
 
         return CreateAnswer(answer=answer)
@@ -132,6 +157,30 @@ class CreateTag(graphene.Mutation):
 
         return CreateTag(tag=tag)
 
+# Accept Answer
+class AcceptAnswer(graphene.Mutation):
+    answer = graphene.Field(AnswerType)
+
+    class Arguments:
+        answerId = graphene.Int()
+        questionId = graphene.Int()
+
+    def mutate(self, info, answerId, questionId):
+        question = Question.objects.get(id=questionId)
+        answer = Answer.objects.get(id=answerId)
+
+        # question.accepted_answer = answer
+        if question.has_accepted_answer==False:
+            answer.is_accepted = True
+            question.has_accepted_answer= True
+            question.save()
+            answer.save()
+        else:
+            
+            raise Exception('Question already has accepted answer!')
+
+        return AcceptAnswer(answer=answer)
+
 # add tag to question
 # class AddTagToQuestion(graphene.Mutation):
 #     question = graphene.Field(QuestionType)
@@ -160,6 +209,7 @@ class Mutation(graphene.ObjectType):
     upvote_answer = UpvoteAnswer.Field()
     downvote_answer = DownvoteAnswer.Field()
     create_tag = CreateTag.Field()
+    accept_answer = AcceptAnswer.Field()
 
 
 class Query(graphene.ObjectType):
@@ -167,6 +217,7 @@ class Query(graphene.ObjectType):
     all_questions = graphene.List(QuestionType)
     all_answers = graphene.List(AnswerType)
     all_tags = graphene.List(TagType)
+    question_by_tag = graphene.List(QuestionType, tag=graphene.String())
 
     # resolvers for Queries
     def resolve_question(self, info, **kwargs):
@@ -185,3 +236,11 @@ class Query(graphene.ObjectType):
     
     def resolve_all_tags(self, info, **kwargs):
         return Tag.objects.all()
+
+    def resolve_question_by_tag(self, info, **kwargs):
+        tag = kwargs.get('tag')
+
+        if tag is not None:
+            return Question.objects.filter(tags__name=tag)
+
+        return None

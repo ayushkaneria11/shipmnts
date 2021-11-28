@@ -31,6 +31,7 @@ class Question(models.Model):
     upvotes = models.IntegerField(default=0)
     downvotes = models.IntegerField(default=0)
     answer_count = models.IntegerField(default=0)
+    has_accepted_answer = models.BooleanField(default=False)
     # answer = models.ForeignKey('Answer', on_delete=models.CASCADE, null=True)
 
 class Answer(models.Model):
@@ -41,6 +42,7 @@ class Answer(models.Model):
     question = models.ForeignKey('Question', on_delete=models.CASCADE)
     upvotes = models.IntegerField(default=0)
     downvotes = models.IntegerField(default=0)
+    is_accepted = models.BooleanField(default=False)
 
 class Tag(models.Model):
     name = models.CharField(max_length=255)
