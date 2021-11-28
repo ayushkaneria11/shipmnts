@@ -46,9 +46,75 @@ class CreateAnswer(graphene.Mutation):
 
         return CreateAnswer(answer=answer)
 
+# Upvote Mutations
+class UpvoteQuestion(graphene.Mutation):
+    question = graphene.Field(QuestionType)
+
+    class Arguments:
+        questionId = graphene.Int()
+
+    def mutate(self, info, questionId):
+        question = Question.objects.get(id=questionId)
+        question.upvotes += 1
+        question.save()
+
+        return UpvoteQuestion(question=question)
+
+# Downvote Mutations
+class DownvoteQuestion(graphene.Mutation):
+    question = graphene.Field(QuestionType)
+
+    class Arguments:
+        questionId = graphene.Int()
+
+    def mutate(self, info, questionId):
+        question = Question.objects.get(id=questionId)
+        question.downvotes += 1
+        question.save()
+
+        return DownvoteQuestion(question=question)
+
+class UpvoteAnswer(graphene.Mutation):
+    answer = graphene.Field(AnswerType)
+
+    class Arguments:
+        answerId = graphene.Int()
+        # questionId = graphene.Int()
+
+    def mutate(self, info, answerId):
+        # question = Question.objects.get(id=questionId)
+        # answer = Answer.
+        answer = Answer.objects.get(id=answerId)
+
+        answer.upvotes += 1
+        answer.save()
+
+        return UpvoteAnswer(answer=answer)
+
+class DownvoteAnswer(graphene.Mutation):
+    answer = graphene.Field(AnswerType)
+
+    class Arguments:
+        answerId = graphene.Int()
+        # questionId = graphene.Int()
+
+    def mutate(self, info, answerId):
+        # question = Question.objects.get(id=questionId)
+        # answer = Answer.
+        answer = Answer.objects.get(id=answerId)
+
+        answer.downvotes += 1
+        answer.save()
+
+        return DownvoteAnswer(answer=answer)
+
 class Mutation(graphene.ObjectType):
     create_question = CreateQuestion.Field()
     create_answer = CreateAnswer.Field()
+    upvote_question = UpvoteQuestion.Field()
+    downvote_question = DownvoteQuestion.Field()
+    upvote_answer = UpvoteAnswer.Field()
+    downvote_answer = DownvoteAnswer.Field()
 
 
 class Query(graphene.ObjectType):
