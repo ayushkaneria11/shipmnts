@@ -210,14 +210,17 @@ class Mutation(graphene.ObjectType):
     downvote_answer = DownvoteAnswer.Field()
     create_tag = CreateTag.Field()
     accept_answer = AcceptAnswer.Field()
+    update_question = UpdateQuestion.Field()
 
 
 class Query(graphene.ObjectType):
     question = graphene.Field(QuestionType, id=graphene.Int())
+    # answer = graphene.Field(AnswerType, id=graphene.Int())
     all_questions = graphene.List(QuestionType)
     all_answers = graphene.List(AnswerType)
     all_tags = graphene.List(TagType)
     question_by_tag = graphene.List(QuestionType, tag=graphene.String())
+    question_by_user = graphene.List(QuestionType, user=graphene.Int())
 
     # resolvers for Queries
     def resolve_question(self, info, **kwargs):
@@ -227,6 +230,14 @@ class Query(graphene.ObjectType):
             return Question.objects.get(pk=id)
 
         return None
+    
+    # def resolve_answer(self, info, **kwargs):
+    #     id = kwargs.get('id')
+
+    #     if id is not None:
+    #         return Answer.objects.get(pk=id)
+
+    #     return None
 
     def resolve_all_questions(self, info, **kwargs):
         return Question.objects.all()
@@ -242,5 +253,13 @@ class Query(graphene.ObjectType):
 
         if tag is not None:
             return Question.objects.filter(tags__name=tag)
+
+        return None
+
+    def resolve_question_by_user(self, info, **kwargs):
+        user = kwargs.get('user')
+
+        if user is not None:
+            return Question.objects.filter(user=user)
 
         return None
