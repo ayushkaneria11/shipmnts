@@ -167,6 +167,7 @@ class Query(graphene.ObjectType):
     all_questions = graphene.List(QuestionType)
     all_answers = graphene.List(AnswerType)
     all_tags = graphene.List(TagType)
+    question_by_tag = graphene.List(QuestionType, tag=graphene.String())
 
     # resolvers for Queries
     def resolve_question(self, info, **kwargs):
@@ -185,3 +186,11 @@ class Query(graphene.ObjectType):
     
     def resolve_all_tags(self, info, **kwargs):
         return Tag.objects.all()
+
+    def resolve_question_by_tag(self, info, **kwargs):
+        tag = kwargs.get('tag')
+
+        if tag is not None:
+            return Question.objects.filter(tags__name=tag)
+
+        return None
