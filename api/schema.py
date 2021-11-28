@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 import graphene
 from graphene_django import DjangoObjectType
-
+import graphql_jwt
 from .models import Question, Answer,Tag
 
 
