@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 import graphene
 from graphene_django import DjangoObjectType
 
@@ -13,6 +14,41 @@ class QuestionType(DjangoObjectType):
 class AnswerType(DjangoObjectType):
     class Meta:
         model = Answer
+
+
+# Create Question Mutation
+class CreateQuestion(graphene.Mutation):
+    question = graphene.Field(QuestionType)
+
+    class Arguments:
+        questionTitle = graphene.String()
+        questionBody = graphene.String()
+        tags = graphene.List(graphene.String)
+
+    def mutate(self, info, questionTitle, questionBody, tags):
+        question = Question(body=questionBody, title=questionTitle,tags=tags)
+        question.save() 
+
+        return CreateQuestion(question=question)
+
+# Create Answer Mutation
+class CreateAnswer(graphene.Mutation):
+    answer = graphene.Field(AnswerType)
+
+    class Arguments:
+        answerBody = graphene.String()
+        questionId = graphene.Int()
+
+    def mutate(self, info, answerBody, questionId):
+        question = Question.objects.get(id=questionId)
+        answer = Answer(body=answerBody, question=question)
+        answer.save()
+
+        return CreateAnswer(answer=answer)
+
+class Mutation(graphene.ObjectType):
+    create_question = CreateQuestion.Field()
+    create_answer = CreateAnswer.Field()
 
 
 class Query(graphene.ObjectType):
